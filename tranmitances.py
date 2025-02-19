@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Definicja transmitancji: H(s) = (s + 1) / (s^2 + 2s + 1)
 numerator = [1, 1]  # Licznik
-denominator = [1, 2, 1]  # Mianownik
+denominator = [1, 2, 5]  # Mianownik
 
 # Tworzenie obiektu transmitancji
 system = signal.TransferFunction(numerator, denominator)
