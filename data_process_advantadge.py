@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from scipy.signal import butter, filtfilt
+from scipy.signal import butter, filtfilt, decimate
 import matplotlib.pyplot as plt
 from scipy.ndimage import median_filter
 from scipy.signal import savgol_filter
@@ -59,18 +59,27 @@ def percentile_filter(data, window_size, percentile):
 forceX["Fx perc 90 (N)"] = percentile_filter(forceX['Force-X (N)'], window_size=801, percentile=50)
 
 # Apply Savitzky-Golay filter
-window_size = 11  # Window size (must be odd)
-poly_order = 3    # Polynomial order
-y_smooth = savgol_filter(y, window_size, poly_order)
+window_size = 121  # Window size (must be odd)
+poly_order = 4    # Polynomial order
+forceX["Fx SG (N)"] = savgol_filter(forceX['Force-X (N)'], window_size, poly_order)
 
+# Decimate the signal
+decimation_factor = 100  # Example decimation factor
+dtimes=decimate(times, decimation_factor)
+dforce = decimate(forceX["Force-X (N)"], decimation_factor)
+times_decimated = decimate(times, decimation_factor)
+
+SGforce=savgol_filter(dforce,window_size,poly_order)
 # Zastosowanie filtra dolnoprzepustowego
 #forceX["Filtered_forceX (N)"] = lowpass_filter(forceX["Force-X (N)"], cutoff, fs, order)
 
 print(forceX)
 plt.plot(times, forceX["Force-X (N)"], label='Raw Data')
-plt.plot(times, forceX["Fx avg (N)"], label='Moving Average')
-plt.plot(times, forceX["Fx med (N)"], label='Median')
-plt.plot(times, forceX["Fx perc 90 (N)"], label='90th Percentile')
+#plt.plot(times, forceX["Fx avg (N)"], label='Moving Average')
+#plt.plot(times, forceX["Fx med (N)"], label='Median')
+#plt.plot(times, forceX["Fx perc 90 (N)"], label='90th Percentile')
+plt.plot(dtimes, SGforce, label='Savitzky-Golay')
+#plt.plot(dtimes, dforce, label='Decimated')
 plt.xlabel('time (s)')
 plt.ylabel('Force (N)')
 plt.legend()
