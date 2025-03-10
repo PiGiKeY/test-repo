@@ -49,16 +49,24 @@ pid = ctrl.TransferFunction([Kd, Kp, Ki], [1, 0])
 # Define the open-loop transfer function
 open_loop = pid * plant
 
-t, response = ctrl.step_response(plant, time)
+
 
 # Define the closed-loop transfer function
 closed_loop = ctrl.feedback(open_loop, 1)
 time = np.linspace(0, 20, 2000)
-t, response_pid = ctrl.step_response(closed_loop, time)
+input=10*np.heaviside(time,1)
+input_noise = input+np.random.normal(0, 2, len(input))
+t, response_pid = ctrl.forced_response(closed_loop,T=time,U=input_noise)
+t, response = ctrl.forced_response(plant, T=time,U=input_noise)
+
+# Dodanie szumu do odpowiedzi z PID
+noise_pid = np.random.normal(0, 1.8, len(response_pid))  # Szum o średniej 0 i odchyleniu standardowym 0.1
+response_pid_with_noise = response_pid + noise_pid
+
 
 #Wykres odpowiedzi skokowej
 plt.plot(t, response, label="Odpowiedź bez PID")
-plt.plot(t, response_pid, label="Odpowiedź z PID", linestyle='--')
+plt.plot(t, response_pid_with_noise, label="Odpowiedź z PID", linestyle='--')
 plt.title("Odpowiedź skokowa systemu z szumem")
 plt.xlabel("Czas [s]")
 plt.ylabel("Odpowiedź")
